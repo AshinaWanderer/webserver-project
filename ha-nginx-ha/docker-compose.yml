@@ -1,6 +1,5 @@
-version: '3.8'
-
 services:
+  # --- 3x Nginx Webserver (Backend) ---
   web1:
     image: nginx:alpine
     container_name: web1
@@ -28,11 +27,16 @@ services:
       ha:
         ipv4_address: 172.28.0.13
 
+  # --- Reverse Proxy MASTER (Nginx + Keepalived) ---
   proxy-master:
     build: ./proxy
     container_name: proxy-master
     cap_add:
       - NET_ADMIN
+    volumes:
+      - ./keepalived/master.conf:/etc/keepalived/keepalived.conf:ro
+    ports:
+      - "80:80"
     networks:
       ha:
         ipv4_address: 172.28.0.2
@@ -41,11 +45,14 @@ services:
       - web2
       - web3
 
+  # --- Reverse Proxy BACKUP (Nginx + Keepalived) ---
   proxy-backup:
     build: ./proxy
     container_name: proxy-backup
     cap_add:
       - NET_ADMIN
+    volumes:
+      - ./keepalived/backup.conf:/etc/keepalived/keepalived.conf:ro
     networks:
       ha:
         ipv4_address: 172.28.0.3
