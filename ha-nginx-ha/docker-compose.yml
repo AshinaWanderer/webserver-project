@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  web1:
+    image: nginx:alpine
+    container_name: web1
+    volumes:
+      - ./web1/index.html:/usr/share/nginx/html/index.html:ro
+    networks:
+      ha:
+        ipv4_address: 172.28.0.11
+
+  web2:
+    image: nginx:alpine
+    container_name: web2
+    volumes:
+      - ./web2/index.html:/usr/share/nginx/html/index.html:ro
+    networks:
+      ha:
+        ipv4_address: 172.28.0.12
+
+  web3:
+    image: nginx:alpine
+    container_name: web3
+    volumes:
+      - ./web3/index.html:/usr/share/nginx/html/index.html:ro
+    networks:
+      ha:
+        ipv4_address: 172.28.0.13
+
+  proxy-master:
+    build: ./proxy
+    container_name: proxy-master
+    cap_add:
+      - NET_ADMIN
+    networks:
+      ha:
+        ipv4_address: 172.28.0.2
+    depends_on:
+      - web1
+      - web2
+      - web3
+
+  proxy-backup:
+    build: ./proxy
+    container_name: proxy-backup
+    cap_add:
+      - NET_ADMIN
+    networks:
+      ha:
+        ipv4_address: 172.28.0.3
+    depends_on:
+      - web1
+      - web2
+      - web3
+
+networks:
+  ha:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
