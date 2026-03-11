@@ -35,3 +35,15 @@ jobs:
             git reset --hard origin/main
             # Start Containers
           "
+
+      - name: Redeploy Containers
+        run: |
+          ssh jack@${{ secrets.VM_HOST }} "
+            set -e
+            cd /home/jack/webserver-project/ha-nginx-ha
+            # Stop Containers
+            docker compose down
+            sleep 10
+            # Start Containers
+            docker compose up -d --build
+          "
