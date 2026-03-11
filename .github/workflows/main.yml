@@ -30,11 +30,8 @@ jobs:
           ssh jack@${{ secrets.VM_HOST }} "
             set -e
             cd /home/jack/webserver-project
-            # Stop Containers
-            docker compose down
             # Pull latest changes
             git fetch --all
             git reset --hard origin/main
             # Start Containers
-            docker compose up -d --build
           "
