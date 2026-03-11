@@ -27,10 +27,9 @@ jobs:
 
       - name: Update VM repo
         run: |
-          ssh serveradm@${{ secrets.VM_HOST }} "
+          ssh jack@${{ secrets.VM_HOST }} "
             set -e
-            # Change this to the absolute path of your repo on the VM
-            cd /path/to/your/repo/on/vm
+            cd /home/jack/webserver-project
             # Pull latest changes
             git fetch --all
             git reset --hard origin/main
