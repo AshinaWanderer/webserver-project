@@ -1,61 +1,48 @@
+version: "3.8"
 services:
   web1:
     image: nginx:alpine
     container_name: web1
+    ports:
+      - "8080:80"
     volumes:
       - ./web1/index.html:/usr/share/nginx/html/index.html:ro
-    networks:
-      - ha
     restart: unless-stopped
 
   web2:
     image: nginx:alpine
     container_name: web2
+    ports:
+      - "8081:80"
     volumes:
       - ./web2/index.html:/usr/share/nginx/html/index.html:ro
-    networks:
-      - ha
     restart: unless-stopped
 
   web3:
     image: nginx:alpine
     container_name: web3
+    ports:
+      - "8082:80"
     volumes:
       - ./web3/index.html:/usr/share/nginx/html/index.html:ro
-    networks:
-      - ha
     restart: unless-stopped
 
   proxy-master:
-    image: nginx:alpine
+    build: ./proxy
     container_name: proxy-master
+    hostname: proxy-master
+    network_mode: host
+    privileged: true
     volumes:
-      - ./nginx-proxy.conf:/etc/nginx/conf.d/default.conf:ro
-    ports:
-      - "8080:80"
-    depends_on:
-      - web1
-      - web2
-      - web3
-    networks:
-      - ha
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     restart: unless-stopped
 
   proxy-backup:
-    image: nginx:alpine
+    build: ./proxy
     container_name: proxy-backup
+    hostname: proxy-backup
+    network_mode: host
+    privileged: true
     volumes:
-      - ./nginx-proxy.conf:/etc/nginx/conf.d/default.conf:ro
-    ports:
-      - "8081:80"
-    depends_on:
-      - web1
-      - web2
-      - web3
-    networks:
-      - ha
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     restart: unless-stopped
-
-networks:
-  ha:
-    driver: bridge
