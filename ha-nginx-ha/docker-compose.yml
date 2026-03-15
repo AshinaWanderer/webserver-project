@@ -1,32 +1,37 @@
+version: "3.8"
 services:
+<<<<<<< HEAD
   # --- Backend web servers ---
+=======
+>>>>>>> ca52eec1b42943065df4316c287e2d3cac545a93
   web1:
     image: nginx:alpine
     container_name: web1
+    ports:
+      - "8080:80"
     volumes:
       - ./web1/index.html:/usr/share/nginx/html/index.html:ro
-    networks:
-      ha:
-        ipv4_address: 172.28.0.11
+    restart: unless-stopped
 
   web2:
     image: nginx:alpine
     container_name: web2
+    ports:
+      - "8081:80"
     volumes:
       - ./web2/index.html:/usr/share/nginx/html/index.html:ro
-    networks:
-      ha:
-        ipv4_address: 172.28.0.12
+    restart: unless-stopped
 
   web3:
     image: nginx:alpine
     container_name: web3
+    ports:
+      - "8082:80"
     volumes:
       - ./web3/index.html:/usr/share/nginx/html/index.html:ro
-    networks:
-      ha:
-        ipv4_address: 172.28.0.13
+    restart: unless-stopped
 
+<<<<<<< HEAD
   # --- Reverse proxy ---
   # Single proxy with TLS. Docker restarts it automatically if it crashes.
   proxy:
@@ -52,3 +57,24 @@ networks:
     ipam:
       config:
         - subnet: 172.28.0.0/24
+=======
+  proxy-master:
+    build: ./proxy
+    container_name: proxy-master
+    hostname: proxy-master
+    network_mode: host
+    privileged: true
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    restart: unless-stopped
+
+  proxy-backup:
+    build: ./proxy
+    container_name: proxy-backup
+    hostname: proxy-backup
+    network_mode: host
+    privileged: true
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    restart: unless-stopped
+>>>>>>> ca52eec1b42943065df4316c287e2d3cac545a93
