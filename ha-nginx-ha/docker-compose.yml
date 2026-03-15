@@ -1,5 +1,5 @@
 services:
-  # --- 3x Nginx Webserver (Backend) ---
+  # --- Backend web servers ---
   web1:
     image: nginx:alpine
     container_name: web1
@@ -27,16 +27,16 @@ services:
       ha:
         ipv4_address: 172.28.0.13
 
-  # --- Reverse Proxy MASTER (Nginx + Keepalived) ---
-  proxy-master:
+  # --- Reverse proxy ---
+  # Single proxy with TLS. Docker restarts it automatically if it crashes.
+  proxy:
     build: ./proxy
-    container_name: proxy-master
-    cap_add:
-      - NET_ADMIN
-    volumes:
-      - ./keepalived/master.conf:/etc/keepalived/keepalived.conf:ro
+    container_name: proxy
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     networks:
       ha:
         ipv4_address: 172.28.0.2
@@ -44,23 +44,7 @@ services:
       - web1
       - web2
       - web3
-
-  proxy-backup:
-    build: ./proxy
-    container_name: proxy-backup
-    cap_add:
-      - NET_ADMIN
-    volumes:
-      - ./keepalived/backup.conf:/etc/keepalived/keepalived.conf:ro
-    ports:
-      - "80:80"
-    networks:
-      ha:
-        ipv4_address: 172.28.0.3
-    depends_on:
-      - web1
-      - web2
-      - web3
+    restart: unless-stopped
 
 networks:
   ha:
